@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Product Catalog</title>
+    <style>
+        body { max-width: 1000px; margin: 36px auto; padding: 0 18px; font: 16px/1.5 Arial, sans-serif; color: #222; }
+        h1 { margin-bottom: 4px; }
+        .intro { color: #555; margin-top: 0; }
+        form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; padding: 16px; background: #f4f5f6; border-radius: 8px; }
+        label { display: block; font-size: 14px; margin-bottom: 4px; }
+        input, select, button { padding: 9px; font: inherit; }
+        input { min-width: 210px; }
+        button, .reset { cursor: pointer; }
+        .reset { padding: 9px 2px; }
+        .results { margin: 22px 0 12px; color: #555; }
+        .product { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 12px 0; }
+        .product h2 { font-size: 19px; margin: 0 0 6px; }
+        .category { font-size: 14px; color: #555; }
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .tag { background: #eef1f4; border-radius: 4px; padding: 3px 8px; font-size: 13px; }
+        .empty { padding: 22px; background: #fafafa; border: 1px dashed #bbb; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Product Catalog</h1>
+    <p class="intro">Search descriptions and narrow the list by category or tag.</p>
+
+    <form method="get" action="">
+        <div>
+            <label for="q">Description contains</label>
+            <input id="q" type="search" name="q" value="{{ search_text }}" placeholder="Try: wireless, travel, coffee">
+        </div>
+        <div>
+            <label for="category">Category</label>
+            <select id="category" name="category">
+                <option value="">All categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="tag">Tag</label>
+            <select id="tag" name="tag">
+                <option value="">All tags</option>
+                {% for tag in tags %}
+                    <option value="{{ tag.id }}" {% if selected_tag == tag.id|stringformat:"s" %}selected{% endif %}>
+                        {{ tag.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit">Apply filters</button>
+        <a class="reset" href="{% url 'catalog:product_list' %}">Clear</a>
+    </form>
+
+    <p class="results">{{ result_count }} product{{ result_count|pluralize }} found</p>
+
+    {% for product in products %}
+        <article class="product">
+            <h2>{{ product.name }}</h2>
+            <div class="category">Category: {{ product.category.name }}</div>
+            <p>{{ product.description }}</p>
+            {% if product.tags.all %}
+                <div class="tags">
+                    {% for tag in product.tags.all %}
+                        <span class="tag">{{ tag.name }}</span>
+                    {% empty %}
+                        <span>No tags</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </article>
+    {% empty %}
+        <div class="empty">No products match those options. Try changing your search or clearing a filter.</div>
+    {% endfor %}
+</body>
+</html>
